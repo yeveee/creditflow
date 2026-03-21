@@ -12,8 +12,8 @@ import com.nexusbank.creditflow.service.credit.modele.StatutDemande;
 @Mapper(componentModel = "spring")
 public interface MappeurReponseDb {
 
-    @Mapping(target = "statut", expression = "java(StatutDemande.valueOf(entity.getStatut()))")
-    
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "statut", expression = "java(com.nexusbank.creditflow.service.credit.modele.StatutDemande.valueOf(entity.getStatut()))")
     DemandeCreditInterne map(DemandeCreditEntity entity);
 
     default <T> Optional<T> wrap(T value) {

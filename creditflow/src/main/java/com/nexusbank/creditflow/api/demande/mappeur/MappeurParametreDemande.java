@@ -14,8 +14,7 @@ public interface MappeurParametreDemande {
     
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateCreation", ignore = true)
-    @Mapping(target = "statut", expression = "java(StatutDemande.SOUMISE)")
-
+    @Mapping(target = "statut", expression = "java(com.nexusbank.creditflow.service.credit.modele.StatutDemande.SOUMISE)")
     DemandeCreditInterne map(DemandeCreditApi api);
 
     default <T> Optional<T> wrap(T value) {

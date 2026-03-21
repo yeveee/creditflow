@@ -3,7 +3,6 @@ package com.nexusbank.creditflow.service.credit.modele;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DemandeCreditInterne {
     
-    private Optional<UUID> id;
+    private Optional<Long> id;
     private Optional<BigDecimal> montant;
     private Optional<Integer> dureeMois;
     private Optional<String> nomEmprunteur;
