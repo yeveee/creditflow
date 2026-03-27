@@ -14,7 +14,6 @@ public interface MappeurParametreDb {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateCreation", ignore = true)
     @Mapping(target = "statut", expression = "java(interne.getStatut().name())")
-
     DemandeCreditEntity map(DemandeCreditInterne interne);
 
     default <T> T unwrap(Optional<T> optional) { return optional.orElse(null); }

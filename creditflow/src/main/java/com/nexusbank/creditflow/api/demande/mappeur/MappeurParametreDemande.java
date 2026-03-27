@@ -12,8 +12,8 @@ import com.nexusbank.creditflow.service.credit.modele.StatutDemande;
 @Mapper(componentModel = "spring")
 public interface MappeurParametreDemande {
     
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "dateCreation", ignore = true)
+    @Mapping(target = "id", expression = "java(java.util.Optional.empty())")
+    @Mapping(target = "dateCreation", expression = "java(java.util.Optional.empty())")
     @Mapping(target = "statut", expression = "java(com.nexusbank.creditflow.service.credit.modele.StatutDemande.SOUMISE)")
     DemandeCreditInterne map(DemandeCreditApi api);
 
