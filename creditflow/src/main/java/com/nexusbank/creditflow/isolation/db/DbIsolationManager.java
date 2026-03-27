@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.nexusbank.creditflow.commun.mappeur.MappeurUtils;
 import com.nexusbank.creditflow.isolation.db.mappeur.MappeurParametreDb;
 import com.nexusbank.creditflow.isolation.db.mappeur.MappeurReponseDb;
 import com.nexusbank.creditflow.isolation.db.modele.DemandeCreditEntity;
@@ -15,30 +16,34 @@ import com.nexusbank.creditflow.service.credit.modele.DemandeCreditInterne;
 public class DbIsolationManager {
 
     private final DemandeCreditRepository repository;
-    private final MappeurParametreDb mappeurParametre;
-    private final MappeurReponseDb mappeurReponse;
+    private final MappeurUtils mappeurUtils;
 
     public DbIsolationManager(
             DemandeCreditRepository repository,
-            MappeurParametreDb mappeurParametre,
-            MappeurReponseDb mappeurReponse) {
+            MappeurUtils mappeurUtils) {
         this.repository = repository;
-        this.mappeurParametre = mappeurParametre;
-        this.mappeurReponse = mappeurReponse;
+        this.mappeurUtils = mappeurUtils;
     }
 
     public DemandeCreditInterne save(DemandeCreditInterne demande) {
+        MappeurParametreDb mappeurParametre = mappeurUtils.getMapper(MappeurParametreDb.class);
+        MappeurReponseDb mappeurReponse = mappeurUtils.getMapper(MappeurReponseDb.class);
+    
         DemandeCreditEntity entity = mappeurParametre.map(demande);
         DemandeCreditEntity saved = repository.save(entity);
         return mappeurReponse.map(saved);
     }
 
     public Optional<DemandeCreditInterne> findById(Long id) {
+        MappeurReponseDb mappeurReponse = mappeurUtils.getMapper(MappeurReponseDb.class);
+    
         return repository.findById(id)
                 .map(mappeurReponse::map);
     }
 
     public List<DemandeCreditInterne> findAll() {
+        MappeurReponseDb mappeurReponse = mappeurUtils.getMapper(MappeurReponseDb.class);
+    
         return repository.findAll().stream()
                 .map(mappeurReponse::map)
                 .collect(Collectors.toList());

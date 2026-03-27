@@ -5,11 +5,12 @@ import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import com.nexusbank.creditflow.commun.mappeur.MappeurParametreAccesseur;
 import com.nexusbank.creditflow.isolation.db.modele.DemandeCreditEntity;
 import com.nexusbank.creditflow.service.credit.modele.DemandeCreditInterne;
 
 @Mapper(componentModel = "spring")
-public interface MappeurParametreDb {
+public interface MappeurParametreDb extends MappeurParametreAccesseur<DemandeCreditInterne, DemandeCreditEntity> {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateCreation", ignore = true)

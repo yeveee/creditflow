@@ -3,6 +3,7 @@ package com.nexusbank.creditflow.api.demande;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nexusbank.creditflow.api.demande.mappeur.MappeurParametreDemande;
 import com.nexusbank.creditflow.api.demande.mappeur.MappeurReponseDemande;
 import com.nexusbank.creditflow.api.demande.modele.DemandeCreditApi;
+import com.nexusbank.creditflow.commun.mappeur.MappeurUtils;
 import com.nexusbank.creditflow.service.credit.DemandeCreditService;
 import com.nexusbank.creditflow.service.credit.modele.DemandeCreditInterne;
 
@@ -25,20 +27,21 @@ import jakarta.validation.Valid;
 public class DemandeCreditController {
 
     private final DemandeCreditService service;
-    private final MappeurParametreDemande mappeurParametre;
-    private final MappeurReponseDemande mappeurReponse;
+    private final MappeurUtils mappeurUtils;
 
+    @Autowired
     public DemandeCreditController(
             DemandeCreditService service,
-            MappeurParametreDemande mappeurParametre,
-            MappeurReponseDemande mappeurReponse) {
+            MappeurUtils mappeurUtils) {
         this.service = service;
-        this.mappeurParametre = mappeurParametre;
-        this.mappeurReponse = mappeurReponse;
+        this.mappeurUtils = mappeurUtils;
     }
 
     @PostMapping
     public ResponseEntity<DemandeCreditApi> creerDemande(@Valid @RequestBody DemandeCreditApi demandeApi) {
+        MappeurParametreDemande mappeurParametre = mappeurUtils.getMapper(MappeurParametreDemande.class);
+        MappeurReponseDemande mappeurReponse = mappeurUtils.getMapper(MappeurReponseDemande.class);
+    
         DemandeCreditInterne demandeInterne = mappeurParametre.map(demandeApi);
         DemandeCreditInterne saved = service.creerDemande(demandeInterne);
         DemandeCreditApi response = mappeurReponse.map(saved);
@@ -46,18 +49,22 @@ public class DemandeCreditController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DemandeCreditApi> obtenirDemande(@PathVariable Long id) {
-        return service.obtenirDemande(id)
-                .map(mappeurReponse::map)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+public ResponseEntity<DemandeCreditApi> obtenirDemande(@PathVariable Long id) {
+    MappeurReponseDemande mappeurReponse = mappeurUtils.getMapper(MappeurReponseDemande.class);
+    
+    return service.obtenirDemande(id)
+            .map(mappeurReponse::map)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+}
 
     @GetMapping
-    public ResponseEntity<List<DemandeCreditApi>> obtenirToutesLesDemandes() {
-        List<DemandeCreditApi> demandes = service.obtenirToutesLesDemandes().stream()
-                .map(mappeurReponse::map)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(demandes);
-    }
+public ResponseEntity<List<DemandeCreditApi>> obtenirToutesLesDemandes() {
+    MappeurReponseDemande mappeurReponse = mappeurUtils.getMapper(MappeurReponseDemande.class);
+    
+    List<DemandeCreditApi> demandes = service.obtenirToutesLesDemandes().stream()
+            .map(mappeurReponse::map)
+            .collect(Collectors.toList());
+    return ResponseEntity.ok(demandes);
+}
 }
