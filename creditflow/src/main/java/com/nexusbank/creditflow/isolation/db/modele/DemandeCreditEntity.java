@@ -3,6 +3,8 @@ package com.nexusbank.creditflow.isolation.db.modele;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.nexusbank.creditflow.commun.modele.ModeleAccesseur;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class DemandeCreditEntity {
+public class DemandeCreditEntity implements ModeleAccesseur {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

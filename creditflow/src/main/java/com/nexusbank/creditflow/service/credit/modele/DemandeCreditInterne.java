@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.nexusbank.creditflow.commun.modele.ModeleInterne;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class DemandeCreditInterne {
+public class DemandeCreditInterne implements ModeleInterne {
     
     private Optional<Long> id;
     private Optional<BigDecimal> montant;

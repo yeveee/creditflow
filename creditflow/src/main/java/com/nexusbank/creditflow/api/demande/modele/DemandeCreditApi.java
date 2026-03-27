@@ -12,11 +12,18 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.nexusbank.creditflow.commun.modele.ModeleApi;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DemandeCreditApi {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = "Modèle API pour une demande de crédit")
+public class DemandeCreditApi implements ModeleApi {
 
     private Long id;
 
