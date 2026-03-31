@@ -48,4 +48,15 @@ public class DbIsolationManager {
                 .map(mappeurReponse::map)
                 .collect(Collectors.toList());
     }
+
+    public Optional<DemandeCreditInterne> updateStatut(Long id, String nouveauStatut) {
+        MappeurReponseDb mappeurReponse = mappeurUtils.getMapper(MappeurReponseDb.class);
+
+        return repository.findById(id)
+        .map(entity -> {
+            entity.setStatut(nouveauStatut);
+            return repository.save(entity);
+        })
+        .map(mappeurReponse::map);
+    }
 }

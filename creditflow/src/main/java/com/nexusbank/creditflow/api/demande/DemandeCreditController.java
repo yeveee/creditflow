@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,10 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nexusbank.creditflow.api.demande.mappeur.MappeurParametreDemande;
 import com.nexusbank.creditflow.api.demande.mappeur.MappeurReponseDemande;
+import com.nexusbank.creditflow.api.demande.modele.ChangementStatutApi;
 import com.nexusbank.creditflow.api.demande.modele.DemandeCreditApi;
 import com.nexusbank.creditflow.commun.mappeur.MappeurUtils;
 import com.nexusbank.creditflow.service.credit.DemandeCreditService;
 import com.nexusbank.creditflow.service.credit.modele.DemandeCreditInterne;
+import com.nexusbank.creditflow.service.credit.modele.StatutDemande;
 
 import jakarta.validation.Valid;
 
@@ -66,5 +69,22 @@ public ResponseEntity<List<DemandeCreditApi>> obtenirToutesLesDemandes() {
             .map(mappeurReponse::map)
             .collect(Collectors.toList());
     return ResponseEntity.ok(demandes);
+}
+
+@PatchMapping("/{id}/statut")
+public ResponseEntity<DemandeCreditApi> changerStatut(
+        @PathVariable Long id,
+        @Valid @RequestBody ChangementStatutApi body) {
+    
+    MappeurReponseDemande mappeurReponse = mappeurUtils.getMapper(MappeurReponseDemande.class);
+    
+    // Convert String → enum
+    StatutDemande nouveauStatut = StatutDemande.valueOf(body.getStatut());
+    
+    // Call service (validates transition + persists)
+    return service.changerStatut(id, nouveauStatut)
+            .map(mappeurReponse::map)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
 }
 }

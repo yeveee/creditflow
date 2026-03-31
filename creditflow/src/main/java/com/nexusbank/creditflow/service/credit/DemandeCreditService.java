@@ -13,9 +13,11 @@ import com.nexusbank.creditflow.service.credit.modele.StatutDemande;
 public class DemandeCreditService {
     
     private final DbIsolationManager dbIsolationManager;
+    private final StatutTransitionValidator statutTransitionValidator;
 
-    public DemandeCreditService(DbIsolationManager dbIsolationManager) {
+    public DemandeCreditService(DbIsolationManager dbIsolationManager, StatutTransitionValidator statutTransitionValidator) {
         this.dbIsolationManager = dbIsolationManager;
+        this.statutTransitionValidator = statutTransitionValidator;
     }
 
     public DemandeCreditInterne creerDemande(DemandeCreditInterne demande) {
@@ -33,5 +35,15 @@ public class DemandeCreditService {
 
     public List<DemandeCreditInterne> obtenirToutesLesDemandes() {
         return dbIsolationManager.findAll();
+    }
+
+    public Optional<DemandeCreditInterne> changerStatut(Long id, StatutDemande nouveauStatut) {
+
+        DemandeCreditInterne demande = obtenirDemande(id)
+        .orElseThrow(() -> new IllegalArgumentException("Demande non trouvée : " + id));
+
+        statutTransitionValidator.valider(demande.getStatut(), nouveauStatut);
+
+        return dbIsolationManager.updateStatut(id, nouveauStatut.name());
     }
 }

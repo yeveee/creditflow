@@ -4,5 +4,7 @@ public enum StatutDemande {
     SOUMISE,
     EN_INSTRUCTION,
     APPROUVEE,
-    REFUSEE
+    REFUSEE,
+    EN_ATTENTE_PIECES,
+    SCORING_EN_COURS
 }
