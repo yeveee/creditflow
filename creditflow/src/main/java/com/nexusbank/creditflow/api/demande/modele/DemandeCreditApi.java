@@ -41,4 +41,8 @@ public class DemandeCreditApi implements ModeleApi {
     private String statut;
 
     private LocalDateTime dateCreation;
+
+    private Integer scoreCredit;
+    
+    private String risqueCredit;
 }

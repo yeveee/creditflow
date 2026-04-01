@@ -43,6 +43,12 @@ public class DemandeCreditEntity implements ModeleAccesseur {
  
     @Column(name = "date_creation", nullable = false, updatable = false)
     private LocalDateTime dateCreation;
+
+    @Column(name = "score_credit")
+    private Integer scoreCredit;
+
+    @Column(name = "risque_credit", length = 50)
+    private String risqueCredit;
  
     @PrePersist
     protected void onCreate() {

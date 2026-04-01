@@ -23,4 +23,6 @@ public class DemandeCreditInterne implements ModeleInterne {
     private Optional<String> nomEmprunteur;
     private StatutDemande statut;
     private Optional<LocalDateTime> dateCreation;
+    private Optional<Integer> scoreCredit;
+    private Optional<String> risqueCredit;
 }
