@@ -11,6 +11,9 @@ import com.nexusbank.creditflow.service.credit.modele.DemandeCreditInterne;
 import com.nexusbank.creditflow.service.credit.modele.ScoreResultatInterne;
 import com.nexusbank.creditflow.service.credit.modele.StatutDemande;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 @Service
 public class DemandeCreditService {
     
@@ -52,6 +55,10 @@ public class DemandeCreditService {
     public List<DemandeCreditInterne> obtenirToutesLesDemandes() {
         return dbIsolationManager.findAll();
     }
+
+    public Page<DemandeCreditInterne> obtenirToutesPaginees(Pageable pageable) {
+        return dbIsolationManager.findAll(pageable);
+}
 
     public Optional<DemandeCreditInterne> changerStatut(Long id, StatutDemande nouveauStatut) {
 

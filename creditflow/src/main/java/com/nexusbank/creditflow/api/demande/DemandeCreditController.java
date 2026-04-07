@@ -24,6 +24,8 @@ import com.nexusbank.creditflow.service.credit.modele.DemandeCreditInterne;
 import com.nexusbank.creditflow.service.credit.modele.StatutDemande;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page; 
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/v1/demandes")
@@ -62,13 +64,12 @@ public ResponseEntity<DemandeCreditApi> obtenirDemande(@PathVariable Long id) {
 }
 
     @GetMapping
-public ResponseEntity<List<DemandeCreditApi>> obtenirToutesLesDemandes() {
+public ResponseEntity<Page<DemandeCreditApi>> obtenirToutesLesDemandes(Pageable pageable) {
     MappeurReponseDemande mappeurReponse = mappeurUtils.getMapper(MappeurReponseDemande.class);
     
-    List<DemandeCreditApi> demandes = service.obtenirToutesLesDemandes().stream()
-            .map(mappeurReponse::map)
-            .collect(Collectors.toList());
-    return ResponseEntity.ok(demandes);
+    Page<DemandeCreditApi> page = service.obtenirToutesPaginees(pageable)
+    .map(mappeurReponse::map);
+    return ResponseEntity.ok(page);
 }
 
 @PatchMapping("/{id}/statut")

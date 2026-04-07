@@ -12,6 +12,9 @@ import com.nexusbank.creditflow.isolation.db.mappeur.MappeurReponseDb;
 import com.nexusbank.creditflow.isolation.db.modele.DemandeCreditEntity;
 import com.nexusbank.creditflow.service.credit.modele.DemandeCreditInterne;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 @Component
 public class DbIsolationManager {
 
@@ -48,6 +51,13 @@ public class DbIsolationManager {
                 .map(mappeurReponse::map)
                 .collect(Collectors.toList());
     }
+
+    public Page<DemandeCreditInterne> findAll(Pageable pageable) {
+    MappeurReponseDb mappeurReponse = mappeurUtils.getMapper(MappeurReponseDb.class);
+
+    return repository.findAll(pageable)
+            .map(mappeurReponse::map);
+}
 
     public Optional<DemandeCreditInterne> updateStatut(Long id, String nouveauStatut) {
         MappeurReponseDb mappeurReponse = mappeurUtils.getMapper(MappeurReponseDb.class);
