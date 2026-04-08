@@ -20,13 +20,16 @@ public class DemandeCreditService {
     private final DbIsolationManager dbIsolationManager;
     private final StatutTransitionValidator statutTransitionValidator;
     private final ScoringIsolationManager scoringIsolationManager;
+    private final NotificationPublisher notificationPublisher;
 
     public DemandeCreditService(DbIsolationManager dbIsolationManager, 
                                 StatutTransitionValidator statutTransitionValidator,
-                                ScoringIsolationManager scoringIsolationManager) {
+                                ScoringIsolationManager scoringIsolationManager,
+                                NotificationPublisher notificationPublisher) {
         this.dbIsolationManager = dbIsolationManager;
         this.statutTransitionValidator = statutTransitionValidator;
         this.scoringIsolationManager = scoringIsolationManager;
+        this.notificationPublisher = notificationPublisher;
     }
 
     public DemandeCreditInterne creerDemande(DemandeCreditInterne demande) {
@@ -66,6 +69,8 @@ public class DemandeCreditService {
         .orElseThrow(() -> new IllegalArgumentException("Demande non trouvée : " + id));
 
         statutTransitionValidator.valider(demande.getStatut(), nouveauStatut);
+
+        notificationPublisher.publierChangementStatut(id, nouveauStatut.name());
 
         return dbIsolationManager.updateStatut(id, nouveauStatut.name());
     }
