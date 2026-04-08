@@ -36,6 +36,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/v1/demandes").hasAnyRole("ANALYSTE", "DIRECTEUR")
                     .requestMatchers(HttpMethod.GET, "/api/v1/demandes/*").hasAnyRole("ANALYSTE", "CLIENT")
                     .requestMatchers(HttpMethod.PATCH, "/api/v1/demandes/*/statut").hasAnyRole("ANALYSTE", "DIRECTEUR")
+                    .requestMatchers("/actuator/**").permitAll()
                     .anyRequest().authenticated())
                     .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                     .build();
