@@ -20,7 +20,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.nexusbank.creditflow.isolation.db.DbIsolationManager;
+import com.nexusbank.creditflow.isolation.scoring.ScoringIsolationManager;
 import com.nexusbank.creditflow.service.credit.modele.DemandeCreditInterne;
+import com.nexusbank.creditflow.service.credit.modele.ScoreResultatInterne;
 import com.nexusbank.creditflow.service.credit.modele.StatutDemande;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,7 +30,16 @@ public class DemandeCreditServiceTest {
 
     @Mock
     private DbIsolationManager dbIsolationManager;
- 
+
+    @Mock
+    private ScoringIsolationManager scoringIsolationManager;
+
+    @Mock
+    private StatutTransitionValidator statutTransitionValidator;
+
+    @Mock
+    private NotificationPublisher notificationPublisher;
+
     @InjectMocks
     private DemandeCreditService service;
  
@@ -54,17 +65,26 @@ void shouldCreateDemandeWithStatusSoumise() {
             .id(Optional.of(1L))
             .build();
 
-            when(dbIsolationManager.save(any(DemandeCreditInterne.class)))
-            .thenReturn(saved);
+    DemandeCreditInterne avecScore = saved.toBuilder()
+            .scoreCredit(Optional.of(750))
+            .risqueCredit(Optional.of("FAIBLE"))
+            .build(); 
 
-            // When
+    when(dbIsolationManager.save(any(DemandeCreditInterne.class)))
+            .thenReturn(saved)
+            .thenReturn(avecScore);
+
+    when(scoringIsolationManager.calculerScore("Marie Martin"))
+            .thenReturn(new ScoreResultatInterne(750, "FAIBLE"));
+
+    // When
     DemandeCreditInterne result = service.creerDemande(demandeTest);
 
-    // Then
+        // Then
     assertNotNull(result);
-    assertEquals(StatutDemande.SOUMISE, result.getStatut());
-    assertEquals(1L, result.getId().orElse(null));
-    verify(dbIsolationManager, times(1)).save(any(DemandeCreditInterne.class));
+    assertEquals(750, result.getScoreCredit().orElse(null));
+    verify(dbIsolationManager, times(2)).save(any());
+    verify(scoringIsolationManager).calculerScore("Marie Martin");
 }
 
 @Test
@@ -95,6 +115,34 @@ void shouldReturnEmptyWhenDemandeNotFound() {
 
     assertFalse(result.isPresent());
     verify(dbIsolationManager, times(1)).findById(id);
+}
+
+@Test
+void shouldChangeStatutSuccessfully() {
+
+    // Given
+    Long id = 1L;
+    DemandeCreditInterne demande = demandeTest.toBuilder()
+            .id(Optional.of(id))
+            .statut(StatutDemande.SOUMISE)
+            .build();
+
+    DemandeCreditInterne updated = demande.toBuilder()
+            .statut(StatutDemande.EN_INSTRUCTION)
+            .build();
+
+    when(dbIsolationManager.findById(id)).thenReturn(Optional.of(demande));
+    when(dbIsolationManager.updateStatut(id, "EN_INSTRUCTION")).thenReturn(Optional.of(updated));
+
+    // When
+    Optional<DemandeCreditInterne> result = service.changerStatut(id, StatutDemande.EN_INSTRUCTION);
+ 
+        // Then
+    assertTrue(result.isPresent());
+    assertEquals(StatutDemande.EN_INSTRUCTION, result.get().getStatut());
+    verify(statutTransitionValidator).valider(StatutDemande.SOUMISE, StatutDemande.EN_INSTRUCTION);
+    verify(notificationPublisher).publierChangementStatut(id, "EN_INSTRUCTION");
+ 
 }
 
 
