@@ -63,7 +63,11 @@ public class DemandeCreditService {
         return dbIsolationManager.findAll(pageable);
 }
 
-    public Optional<DemandeCreditInterne> changerStatut(Long id, StatutDemande nouveauStatut) {
+    public Page<DemandeCreditInterne> obtenirDemandesDuClient(String clientUsername, Pageable pageable) {
+        return dbIsolationManager.findByClientUsername(clientUsername, pageable);
+    }
+
+    public Optional<DemandeCreditInterne> changerStatut(Long id, StatutDemande nouveauStatut, String modifiePar) {
 
         DemandeCreditInterne demande = obtenirDemande(id)
         .orElseThrow(() -> new IllegalArgumentException("Demande non trouvée : " + id));
@@ -72,6 +76,10 @@ public class DemandeCreditService {
 
         notificationPublisher.publierChangementStatut(id, nouveauStatut.name());
 
-        return dbIsolationManager.updateStatut(id, nouveauStatut.name());
+        Optional<DemandeCreditInterne> resultat = dbIsolationManager.updateStatut(id, nouveauStatut.name());
+
+        resultat.ifPresent(r -> dbIsolationManager.auditerChangementStatut(id, nouveauStatut.name(), modifiePar));
+
+        return resultat;
     }
 }

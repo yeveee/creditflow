@@ -9,7 +9,7 @@ import com.nexusbank.creditflow.service.credit.modele.Role;
 
 public class JwtServiceTest {
     
-    private final JwtService jwtService = new JwtService();
+    private final JwtService jwtService = new JwtService("test-secret-key-qui-doit-etre-tres-longue-pour-HS384");
 
     @Test
     void shouldGenerateAndExtractUsername() {

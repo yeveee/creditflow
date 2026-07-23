@@ -12,8 +12,6 @@ import com.nexusbank.creditflow.service.credit.modele.DemandeCreditInterne;
 @Mapper(componentModel = "spring")
 public interface MappeurParametreDb extends MappeurParametreAccesseur<DemandeCreditInterne, DemandeCreditEntity> {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "dateCreation", ignore = true)
     @Mapping(target = "statut", expression = "java(interne.getStatut().name())")
     DemandeCreditEntity map(DemandeCreditInterne interne);
 

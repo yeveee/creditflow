@@ -1,0 +1,165 @@
+<div class="page">
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Demandes de crédit</h1>
+        <p class="page-subtitle">
+          @if (page()) {
+            {{ page()!.totalElements }} demande(s) au total
+          } @else {
+            Suivi et instruction des dossiers
+          }
+        </p>
+      </div>
+      <button type="button" class="btn btn-outline" (click)="load()" [disabled]="loading()">
+        Actualiser
+      </button>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-error" role="alert">{{ error() }}</div>
+    }
+
+    @if (loading()) {
+      <div class="loading-center" role="status" aria-live="polite">
+        <div class="spinner spinner-dark spinner-lg" aria-hidden="true"></div>
+        <span>Chargement des demandes…</span>
+      </div>
+    } @else if (page() && page()!.content.length === 0) {
+      <div class="card">
+        <div class="empty-state">
+          <h3>Aucune demande</h3>
+          <p>Il n'y a pas encore de demande de crédit enregistrée.</p>
+        </div>
+      </div>
+    } @else if (page()) {
+      <div class="card">
+        <div class="table-wrap">
+          <table class="table">
+            <caption class="sr-only">Liste des demandes de crédit</caption>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Emprunteur</th>
+                <th scope="col" class="text-right">Montant</th>
+                <th scope="col" class="text-right">Durée</th>
+                <th scope="col" class="text-right">Score</th>
+                <th scope="col">Risque</th>
+                <th scope="col">Statut</th>
+                <th scope="col">Créée le</th>
+                <th scope="col" class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of page()!.content; track d.id) {
+                <tr>
+                  <td class="mono muted">{{ d.id }}</td>
+                  <td><strong>{{ d.nomEmprunteur }}</strong></td>
+                  <td class="text-right mono">{{ d.montant | currency: 'EUR' : 'symbol' : '1.0-0' }}</td>
+                  <td class="text-right mono">{{ d.dureeMois }} mois</td>
+                  <td class="text-right mono">{{ d.scoreCredit ?? '—' }}</td>
+                  <td>
+                    @if (d.risqueCredit) {
+                      <span class="risk {{ riskClass(d.risqueCredit) }}">{{ d.risqueCredit }}</span>
+                    } @else {
+                      <span class="muted">—</span>
+                    }
+                  </td>
+                  <td><app-statut-badge [statut]="d.statut" /></td>
+                  <td class="muted">{{ d.dateCreation | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="text-right">
+                    <div class="row-actions">
+                      @if (canViewDetail()) {
+                        <a class="btn btn-ghost btn-sm" [routerLink]="['/demandes', d.id]">Détails</a>
+                      }
+                      @if (canChangeStatut()) {
+                        <button type="button" class="btn btn-outline btn-sm" (click)="openManage(d)">
+                          Statut
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pager">
+          <span class="muted" aria-live="polite">
+            Page {{ page()!.number + 1 }} / {{ page()!.totalPages }}
+          </span>
+          <div class="row">
+            <button
+              type="button"
+              class="btn btn-outline btn-sm"
+              [disabled]="page()!.first"
+              (click)="goTo(pageIndex() - 1)"
+              aria-label="Page précédente"
+            >
+              Précédent
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline btn-sm"
+              [disabled]="page()!.last"
+              (click)="goTo(pageIndex() + 1)"
+              aria-label="Page suivante"
+            >
+              Suivant
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Manage status modal -->
+@if (selected(); as d) {
+  <div class="modal-backdrop" (click)="closeManage()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="manage-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-head">
+        <h3 id="manage-title">Gérer la demande #{{ d.id }}</h3>
+        <button type="button" class="toast-close" (click)="closeManage()" aria-label="Fermer">
+          &#10005;
+        </button>
+      </div>
+
+      <div class="modal-body stack">
+        <div class="summary">
+          <div>
+            <span class="summary-label">Emprunteur</span>
+            <strong>{{ d.nomEmprunteur }}</strong>
+          </div>
+          <div>
+            <span class="summary-label">Montant</span>
+            <strong>{{ d.montant | currency: 'EUR' : 'symbol' : '1.0-0' }}</strong>
+          </div>
+          <div>
+            <span class="summary-label">Statut actuel</span>
+            <app-statut-badge [statut]="d.statut" />
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <span class="label">Faire évoluer le statut</span>
+        <app-statut-actions
+          [statut]="d.statut"
+          [disabled]="updating() === d.id"
+          (change)="applyStatut($event)"
+        />
+        @if (updating() === d.id) {
+          <span class="field-hint">Mise à jour en cours…</span>
+        }
+      </div>
+    </div>
+  </div>
+}

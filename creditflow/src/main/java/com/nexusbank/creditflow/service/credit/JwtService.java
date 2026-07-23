@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.nexusbank.creditflow.service.credit.modele.Role;
@@ -15,11 +16,14 @@ import io.jsonwebtoken.security.Keys;
 @Component
 
 public class JwtService {
-    
-    private static final String SECRET = "creditflow-secret-key-qui-doit-etre-tres-longue-pour-HS256";
+
     private static final long EXPIRATION_MS = 86400000; // 24 hours
-    
-    private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
+
+    private final SecretKey key;
+
+    public JwtService(@Value("${jwt.secret}") String secret) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     public String genererToken(String username, Role role) {
     return Jwts.builder()

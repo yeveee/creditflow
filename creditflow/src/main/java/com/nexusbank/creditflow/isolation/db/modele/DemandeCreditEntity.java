@@ -49,7 +49,10 @@ public class DemandeCreditEntity implements ModeleAccesseur {
 
     @Column(name = "risque_credit", length = 50)
     private String risqueCredit;
- 
+
+    @Column(name = "client_username", updatable = false, length = 255)
+    private String clientUsername;
+
     @PrePersist
     protected void onCreate() {
         if (dateCreation == null) {

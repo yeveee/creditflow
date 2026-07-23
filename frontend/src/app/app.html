@@ -1,0 +1,12 @@
+<router-outlet />
+
+<div class="toast-host" role="region" aria-label="Notifications" aria-live="polite">
+  @for (t of toast.toasts(); track t.id) {
+    <div class="toast toast-{{ t.kind }}">
+      <span>{{ t.message }}</span>
+      <button type="button" class="toast-close" (click)="toast.dismiss(t.id)" aria-label="Fermer">
+        &#10005;
+      </button>
+    </div>
+  }
+</div>

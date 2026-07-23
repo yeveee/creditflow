@@ -1,0 +1,112 @@
+<div class="auth">
+  <!-- Brand panel -->
+  <aside class="auth-brand">
+    <div class="brand-top">
+      <span class="brand-mark" aria-hidden="true">CF</span>
+      <span class="brand-name">CreditFlow</span>
+    </div>
+
+    <div class="brand-hero">
+      <h1>Gestion des demandes de crédit</h1>
+      <p>
+        Plateforme d'instruction et de décision — soumission, scoring et suivi du
+        cycle de vie des dossiers.
+      </p>
+
+      <ul class="brand-features">
+        <li><span class="dot" aria-hidden="true"></span> Scoring automatisé et évaluation du risque</li>
+        <li><span class="dot" aria-hidden="true"></span> Workflow d'instruction à états contrôlés</li>
+        <li><span class="dot" aria-hidden="true"></span> Accès sécurisé par rôle (JWT / RBAC)</li>
+      </ul>
+    </div>
+
+    <div class="brand-footer">Nexus Bank — Direction des Systèmes d'Information</div>
+  </aside>
+
+  <!-- Form panel -->
+  <main class="auth-form">
+    <div class="auth-card">
+      <header class="auth-head">
+        <h2>Connexion</h2>
+        <p class="muted">Accédez à votre espace CreditFlow</p>
+      </header>
+
+      @if (error()) {
+        <div class="alert alert-error" role="alert">{{ error() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
+        <div class="form-group">
+          <label class="label" for="username">Nom d'utilisateur</label>
+          <input
+            id="username"
+            type="text"
+            class="input"
+            formControlName="username"
+            autocomplete="username"
+            placeholder="ex. analyste1"
+            aria-describedby="username-error"
+            [attr.aria-invalid]="form.controls.username.touched && form.controls.username.invalid ? 'true' : null"
+          />
+          @if (form.controls.username.touched && form.controls.username.invalid) {
+            <span id="username-error" class="field-error" role="alert">Le nom d'utilisateur est requis.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="password">Mot de passe</label>
+          <div class="input-group">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              class="input"
+              formControlName="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              aria-describedby="password-error"
+              [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid ? 'true' : null"
+            />
+            <button
+              type="button"
+              class="reveal"
+              (click)="togglePassword()"
+              [attr.aria-pressed]="showPassword()"
+              [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+            >
+              {{ showPassword() ? 'Masquer' : 'Afficher' }}
+            </button>
+          </div>
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <span id="password-error" class="field-error" role="alert">Le mot de passe est requis.</span>
+          }
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="loading()">
+          @if (loading()) {
+            <span class="spinner"></span> Connexion…
+          } @else {
+            Se connecter
+          }
+        </button>
+      </form>
+
+      <div class="demo">
+        <span class="demo-title">Comptes de démonstration</span>
+        <div class="demo-grid">
+          @for (acc of demoAccounts; track acc.username) {
+            <button
+              type="button"
+              class="demo-chip"
+              (click)="useDemo(acc.username)"
+              [attr.aria-label]="'Pré-remplir avec le compte ' + acc.username + ' (' + acc.role + ')'"
+            >
+              <strong>{{ acc.role }}</strong>
+              <small>{{ acc.username }}</small>
+            </button>
+          }
+        </div>
+        <span class="field-hint">Mot de passe commun : <code>password123</code></span>
+      </div>
+    </div>
+  </main>
+</div>

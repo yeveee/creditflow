@@ -165,4 +165,54 @@
 		</plugins>
 	</build>
 
+	<!-- JaCoCo lives in an opt-in profile (`mvn verify -Pcoverage`), not the default build.
+	     Root cause of this project's intermittent local build failures (a spurious
+	     NoClassDefFoundError while Spring loads MapStruct-generated *Impl classes): the IDE's
+	     Java language server recompiles this same project in the background and can briefly
+	     overwrite target/classes with a partially-compiled class while `mvn verify` is running
+	     (confirmed by suspending the language server process: failure rate drops to 0 across
+	     several consecutive runs). JaCoCo's own bytecode agent is an extra moving part on top of
+	     that pre-existing risk, so it is kept out of the default `mvn clean verify` path (used by
+	     CI, where no such background compiler exists) and run on demand for coverage measurement. -->
+	<profiles>
+		<profile>
+			<id>coverage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.12</version>
+						<executions>
+							<execution>
+								<id>prepare-agent</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+								<configuration>
+									<excludes>
+										<exclude>com/nexusbank/creditflow/**/Mappeur*Impl</exclude>
+										<exclude>com/nexusbank/creditflow/commun/**</exclude>
+									</excludes>
+								</configuration>
+							</execution>
+							<execution>
+								<id>report</id>
+								<phase>test</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+								<configuration>
+									<excludes>
+										<exclude>**/Mappeur*Impl.class</exclude>
+									</excludes>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

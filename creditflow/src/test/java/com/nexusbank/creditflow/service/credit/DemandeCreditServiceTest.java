@@ -135,14 +135,15 @@ void shouldChangeStatutSuccessfully() {
     when(dbIsolationManager.updateStatut(id, "EN_INSTRUCTION")).thenReturn(Optional.of(updated));
 
     // When
-    Optional<DemandeCreditInterne> result = service.changerStatut(id, StatutDemande.EN_INSTRUCTION);
- 
+    Optional<DemandeCreditInterne> result = service.changerStatut(id, StatutDemande.EN_INSTRUCTION, "analyste1");
+
         // Then
     assertTrue(result.isPresent());
     assertEquals(StatutDemande.EN_INSTRUCTION, result.get().getStatut());
     verify(statutTransitionValidator).valider(StatutDemande.SOUMISE, StatutDemande.EN_INSTRUCTION);
     verify(notificationPublisher).publierChangementStatut(id, "EN_INSTRUCTION");
- 
+    verify(dbIsolationManager).auditerChangementStatut(id, "EN_INSTRUCTION", "analyste1");
+
 }
 
 

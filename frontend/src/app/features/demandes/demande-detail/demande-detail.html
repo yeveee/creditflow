@@ -1,0 +1,132 @@
+<div class="page">
+  <div class="container">
+    @if (canReturnToList()) {
+      <a routerLink="/demandes" class="back-link">&larr; Retour aux demandes</a>
+    }
+
+    @if (loading()) {
+      <div class="loading-center" role="status" aria-live="polite">
+        <div class="spinner spinner-dark spinner-lg" aria-hidden="true"></div>
+        <span>Chargement de la demande…</span>
+      </div>
+    } @else if (error()) {
+      <div class="card">
+        <div class="empty-state">
+          <h3>{{ error() }}</h3>
+          <a routerLink="/" class="btn btn-primary" style="margin-top: 12px">Accueil</a>
+        </div>
+      </div>
+    } @else if (demande(); as d) {
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Demande #{{ d.id }}</h1>
+          <p class="page-subtitle">
+            Créée le {{ d.dateCreation | date: 'dd MMMM yyyy à HH:mm' }}
+          </p>
+        </div>
+        <app-statut-badge [statut]="d.statut" />
+      </div>
+
+      <!-- Workflow stepper -->
+      <div class="card">
+        <div class="card-body">
+          <div
+            class="stepper"
+            [class.refused]="isRefused()"
+            role="list"
+            aria-label="Progression du dossier"
+          >
+            @for (step of steps; track step; let i = $index) {
+              <div
+                class="step"
+                role="listitem"
+                [class.done]="i < stepIndex()"
+                [class.current]="i === stepIndex()"
+                [attr.aria-current]="i === stepIndex() ? 'step' : null"
+              >
+                <span class="step-dot" aria-hidden="true">{{ i + 1 }}</span>
+                <span class="step-label">{{ step }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <!-- Info -->
+        <div class="card">
+          <div class="card-header">Informations du dossier</div>
+          <div class="card-body">
+            <dl class="info">
+              <div>
+                <dt>Emprunteur</dt>
+                <dd>{{ d.nomEmprunteur }}</dd>
+              </div>
+              <div>
+                <dt>Montant demandé</dt>
+                <dd class="mono">{{ d.montant | currency: 'EUR' : 'symbol' : '1.0-0' }}</dd>
+              </div>
+              <div>
+                <dt>Durée</dt>
+                <dd class="mono">{{ d.dureeMois }} mois</dd>
+              </div>
+              <div>
+                <dt>Statut</dt>
+                <dd><app-statut-badge [statut]="d.statut" /></dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Scoring -->
+        <div class="card">
+          <div class="card-header">Évaluation du risque</div>
+          <div class="card-body">
+            @if (d.scoreCredit != null) {
+              <div class="score">
+                <div class="score-value mono">{{ d.scoreCredit }}</div>
+                <div class="score-meta">
+                  <span class="muted">Score de crédit / 1000</span>
+                  @if (d.risqueCredit) {
+                    <span class="risk {{ riskClass(d.risqueCredit) }}">
+                      Risque {{ d.risqueCredit }}
+                    </span>
+                  }
+                </div>
+              </div>
+              <div
+                class="score-bar"
+                role="progressbar"
+                [attr.aria-valuenow]="d.scoreCredit"
+                aria-valuemin="0"
+                aria-valuemax="1000"
+                [attr.aria-label]="'Score de crédit : ' + d.scoreCredit + ' sur 1000'"
+              >
+                <div class="score-bar-fill" [style.width.%]="(d.scoreCredit / 1000) * 100"></div>
+              </div>
+            } @else {
+              <p class="muted">Aucun score calculé pour cette demande.</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Status management (ANALYSTE only) -->
+      @if (canChangeStatut()) {
+        <div class="card">
+          <div class="card-header">Instruction — faire évoluer le statut</div>
+          <div class="card-body stack">
+            <app-statut-actions
+              [statut]="d.statut"
+              [disabled]="updating()"
+              (change)="applyStatut($event)"
+            />
+            @if (updating()) {
+              <span class="field-hint">Mise à jour en cours…</span>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

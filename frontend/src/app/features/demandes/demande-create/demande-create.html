@@ -1,0 +1,98 @@
+<div class="page">
+  <div class="container narrow">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Nouvelle demande de crédit</h1>
+        <p class="page-subtitle">Renseignez les informations du dossier à soumettre</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        @if (error()) {
+          <div class="alert alert-error" role="alert" style="margin-bottom: 18px">{{ error() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
+          <div class="form-group">
+            <label class="label" for="nom">Nom de l'emprunteur</label>
+            <input
+              id="nom"
+              type="text"
+              class="input"
+              formControlName="nomEmprunteur"
+              placeholder="ex. Jean Dupont"
+              aria-describedby="nom-error"
+              [attr.aria-invalid]="form.controls.nomEmprunteur.touched && form.controls.nomEmprunteur.invalid ? 'true' : null"
+            />
+            @if (form.controls.nomEmprunteur.touched && form.controls.nomEmprunteur.invalid) {
+              <span id="nom-error" class="field-error" role="alert">Le nom de l'emprunteur est obligatoire (2 caractères min).</span>
+            }
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="label" for="montant">Montant</label>
+              <div class="input-group">
+                <input
+                  id="montant"
+                  type="number"
+                  class="input"
+                  formControlName="montant"
+                  min="1000"
+                  step="500"
+                  aria-describedby="montant-help"
+                  [attr.aria-invalid]="form.controls.montant.touched && form.controls.montant.invalid ? 'true' : null"
+                />
+                <span class="input-suffix" aria-hidden="true">€</span>
+              </div>
+              @if (form.controls.montant.touched && form.controls.montant.invalid) {
+                <span id="montant-help" class="field-error" role="alert">Montant minimum : 1 000 €.</span>
+              } @else {
+                <span id="montant-help" class="field-hint">Montant minimum : 1 000 €.</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label class="label" for="duree">Durée</label>
+              <div class="input-group">
+                <input
+                  id="duree"
+                  type="number"
+                  class="input"
+                  formControlName="dureeMois"
+                  min="6"
+                  step="6"
+                  aria-describedby="duree-help"
+                  [attr.aria-invalid]="form.controls.dureeMois.touched && form.controls.dureeMois.invalid ? 'true' : null"
+                />
+                <span class="input-suffix" aria-hidden="true">mois</span>
+              </div>
+              @if (form.controls.dureeMois.touched && form.controls.dureeMois.invalid) {
+                <span id="duree-help" class="field-error" role="alert">Durée minimale : 6 mois.</span>
+              } @else {
+                <span id="duree-help" class="field-hint">Durée minimale : 6 mois.</span>
+              }
+            </div>
+          </div>
+
+          <div class="alert alert-info">
+            À la soumission, la demande passe au statut <strong>Soumise</strong> et un
+            <strong>score de crédit</strong> est calculé automatiquement.
+          </div>
+
+          <div class="actions">
+            <a routerLink="/" class="btn btn-ghost">Annuler</a>
+            <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+              @if (submitting()) {
+                <span class="spinner"></span> Soumission…
+              } @else {
+                Soumettre la demande
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+<div class="shell">
+  <a class="skip-link" href="#contenu-principal">Aller au contenu principal</a>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" routerLink="/">
+        <span class="brand-mark" aria-hidden="true">CF</span>
+        <span class="brand-text">
+          <strong>CreditFlow</strong>
+          <small>Nexus Bank</small>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Navigation principale">
+        @if (isStaff()) {
+          <a routerLink="/demandes" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-link">Demandes</a>
+        }
+        @if (isClient()) {
+          <a
+            routerLink="/demandes"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+            class="nav-link"
+          >
+            Mes demandes
+          </a>
+          <a routerLink="/demandes/nouvelle" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-link">
+            Nouvelle demande
+          </a>
+        }
+      </nav>
+
+      <div class="spacer"></div>
+
+      <div class="user">
+        <div class="user-meta">
+          <span class="user-name">{{ username() }}</span>
+          <span class="user-role">{{ role() }}</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" (click)="logout()">
+          Déconnexion
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenu-principal" class="content" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>
