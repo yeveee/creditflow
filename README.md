@@ -23,6 +23,13 @@ CreditFlow couvre le cycle de vie complet d'un dossier de crédit — soumission
 
 ---
 
+## Prérequis
+
+- Java JDK **21** (`mvn -version` doit afficher `Java version: 21.x` — pas juste `java -version`, qui peut différer si plusieurs JDK sont installés)
+- Maven 3.9+
+- Docker et Docker Compose
+- Node.js 20.19+ ou 22.12+
+
 ## Démarrage rapide
 
 ```bash
@@ -38,6 +45,8 @@ cd ../frontend
 npm install
 npm start
 ```
+
+En cas d'erreur `release version 21 not supported`, voir la section [Dépannage](creditflow/README.md#dépannage) de `creditflow/README.md`.
 
 | Service | URL |
 |---|---|

@@ -914,6 +914,17 @@ curl http://localhost:8080/actuator/health
 open http://localhost:8080/swagger-ui.html
 ```
 
+#### Dépannage
+
+**`error: release version 21 not supported` au lancement de `mvn spring-boot:run`** — anomalie rencontrée lors d'un test réel du manuel par un tiers n'ayant jamais touché au projet, ce qui a permis de compléter cette section.
+
+Maven compile avec le JDK qu'il trouve dans son environnement, qui peut différer de celui renvoyé par `java -version` si plusieurs JDK sont installés sur la machine.
+
+1. Vérifier le JDK réellement utilisé par Maven : `mvn -version` → la ligne `Java version: ...` doit afficher `21.x`
+2. Si ce n'est pas le cas, installer un JDK 21 (ex. Temurin, cohérent avec le Dockerfile/CI du projet)
+3. Faire pointer `JAVA_HOME` sur ce JDK 21 (macOS : `export JAVA_HOME=$(/usr/libexec/java_home -v 21)`)
+4. Revérifier `mvn -version`, puis relancer `mvn spring-boot:run`
+
 #### Déploiement Conteneurisé (Docker)
 
 ```bash

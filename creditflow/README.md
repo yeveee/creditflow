@@ -78,6 +78,19 @@ http://localhost:8080/swagger-ui.html
 
 ---
 
+## Dépannage
+
+**`error: release version 21 not supported` au lancement de `mvn spring-boot:run`**
+
+Maven compile avec le JDK qu'il trouve dans son environnement — pas forcément celui renvoyé par `java -version` si plusieurs JDK sont installés sur la machine.
+
+1. Vérifier le JDK réellement utilisé par Maven : `mvn -version` → ligne `Java version: ...` (doit afficher `21.x`)
+2. Si ce n'est pas le cas, installer un JDK 21 (ex. Temurin : `brew install temurin@21` sur Mac, ou via [adoptium.net](https://adoptium.net))
+3. Faire pointer `JAVA_HOME` dessus — macOS : `export JAVA_HOME=$(/usr/libexec/java_home -v 21)`
+4. Revérifier `mvn -version`, puis relancer `mvn spring-boot:run`
+
+---
+
 ## Endpoints REST
 
 | Méthode | Endpoint                        | Rôle requis          | Description                    |
