@@ -2,8 +2,8 @@
 
 **Projet :** CreditFlow — Microservice de Gestion des Demandes de Crédit  
 **Candidat :** Yevhenii Bondarenko  
-**Date :** Mars 2026  
-**Révision :** 22/07/2026 — mise à jour des sections C2.1.1, C2.2.3 et C2.2.4 suite à une vérification du dossier en conditions réelles (build, tests, couverture JaCoCo, exécution back-end et front-end)
+**Date :** Juillet 2026  
+**Repository GitHub :** [https://github.com/yeveee/creditflow](https://github.com/yeveee/creditflow)
 
 ---
 
@@ -16,7 +16,7 @@ Le projet **CreditFlow** est livré en deux composants complémentaires, version
 | **API (back-end)** | Microservice métier : soumission, scoring, machine à états, sécurité JWT/RBAC | Java 21, Spring Boot 4.0.3, PostgreSQL, RabbitMQ |
 | **Interface web (front-end)** | Client des utilisateurs (client, analyste, directeur) : authentification, soumission, liste et détail des demandes | Angular 20 (*standalone*, *signals*), TypeScript, SCSS |
 
-Le front-end (`frontend/`) consomme l'API (`creditflow/`) via l'URL `/api/v1`. En développement, un *proxy* redirige `/api` et `/actuator` vers `http://localhost:8080`, ce qui évite toute configuration CORS. Les contrôles d'accès du front (guards, intercepteur JWT) **reproduisent fidèlement** la matrice RBAC du back-end (`SecurityConfig`).
+Le front-end (`frontend/`) appelle l'API (`creditflow/`) sur `/api/v1`. En développement, le serveur Angular redirige automatiquement les appels `/api` et `/actuator` vers `http://localhost:8080` : pas besoin de configurer CORS. Le front applique les mêmes règles d'accès par rôle que le back-end (`SecurityConfig`), pour n'afficher aux utilisateurs que ce qu'ils ont le droit de voir.
 
 ## Correspondance avec la Grille d'Évaluation
 
@@ -27,7 +27,6 @@ Le front-end (`frontend/`) consomme l'API (`creditflow/`) via l'URL `/api/v1`. E
 | **C2.2.1** | Architecture maintenable ; prototype ; framework et paradigmes | § C2.2.1 (SOL V1 + prototype front Angular) |
 | **C2.2.2** | Jeu de tests unitaires couvrant une fonctionnalité | § C2.2.2 |
 | **C2.2.3** | Mesures de sécurité (OWASP) ; accessibilité (référentiel) | § C2.2.3 (OWASP Top 10 + RGAA 4.1 implémenté) |
-| **C2.2.4** | Historique des versions ; dernière version fonctionnelle | § C2.2.4 |
 | **C2.3.1** | Cahier de recettes | § C2.3.1 |
 | **C2.3.2** | Plan de correction des bogues | § C2.3.2 |
 | **C2.4.1** | Manuels de déploiement, d'utilisation et de mise à jour | § C2.4.1 |
@@ -40,19 +39,17 @@ Le front-end (`frontend/`) consomme l'API (`creditflow/`) via l'URL `/api/v1`. E
 
 | Outil | Rôle | Version |
 |-------|------|---------|
-| IntelliJ IDEA Ultimate | IDE principal (refactoring, débogage, MapStruct support) | 2024.x |
-| Java JDK | Compilation et exécution | 21 LTS |
-| Maven | Gestion des dépendances et build | 3.9.x |
-| Docker Desktop | Conteneurisation des services tiers | 24.x |
-| Docker Compose | Orchestration locale (PostgreSQL, RabbitMQ) | 2.24.x |
-| Git | Gestion de versions | 2.43 |
-| GitHub | Hébergement du dépôt + CI/CD | — |
-| Postman | Tests manuels des endpoints REST | — |
-| DBeaver | Inspection des données PostgreSQL | — |
-| Node.js | *Runtime* de build du front-end Angular | 22 LTS |
-| Angular CLI | *Scaffolding*, build (`ng build`) et serveur de dev (`ng serve`) | 20.x |
+| Visual Studio Code | Éditeur principal, back-end et front-end (extensions Java + TypeScript) | — |
+| Java JDK | Compilation et exécution du back-end | 21 LTS |
+| Maven | Gestion des dépendances et build back-end | 3.9.x |
+| Tomcat (embarqué) | Serveur qui fait tourner l'API — livré directement avec Spring Boot, rien à installer à part (`spring-boot-starter-webmvc`) | 11.0.x |
+| Docker Desktop | Fait tourner les services tiers dans des conteneurs | 24.x |
+| Docker Compose | Démarre PostgreSQL et RabbitMQ ensemble en une commande | 2.24.x |
+| Git | Suivi des versions du code | 2.43 |
+| GitHub | Hébergement du dépôt + intégration continue | — |
+| Node.js | Fait tourner les outils de build du front-end Angular | 22 LTS |
+| Angular CLI | Génère les fichiers du projet, build (`ng build`), serveur de dev (`ng serve`) | 20.x |
 | npm | Gestion des dépendances front-end | 10.x |
-| Visual Studio Code | Édition du front-end (TypeScript / HTML / SCSS) | — |
 
 ### Stack Technique de l'Application
 
@@ -65,7 +62,7 @@ Le front-end (`frontend/`) consomme l'API (`creditflow/`) via l'URL `/api/v1`. E
 ├───────────┴─────────────┴───────────────────┤
 │ MapStruct 1.5.5 │ JUnit 5 │ Mockito 5       │
 ├─────────────────────────────────────────────┤
-│ PostgreSQL │ RabbitMQ │ Resilience4j         │
+│ PostgreSQL │ RabbitMQ │ Resilience4j        │
 └─────────────────────────────────────────────┘
 ```
 
@@ -104,7 +101,7 @@ Séquence de déploiement (GitHub Actions) :
 
 | Critère | Outil de mesure | Seuil minimal | Mesure constatée |
 |---------|-----------------|---------------|-------------------|
-| Couverture de code | JaCoCo (plugin Maven `jacoco-maven-plugin`, profil opt-in `mvn verify -Pcoverage`, code MapStruct généré exclu de la mesure) | ≥ 80% (cible) | **96,1% des instructions / 95,4% des lignes** au 23/07/2026 — seuil dépassé. `SecurityConfig`, `DemandeCreditController`, `DbIsolationManager`, `JwtService`, `JwtAuthenticationFilter`, `AuthController`, `ScoringIsolationManager`, `StatutTransitionValidator`, `GlobalExceptionHandler`, `NotificationPublisher` : 100% ; `DemandeCreditService` : 87%. Seuls restent sous-couverts l'entité JPA `DemandeCreditEntity` (accesseurs générés), l'utilitaire `MappeurUtils` (une ligne) et la classe `Application` (méthode `main`) — code déclaratif ou point d'entrée, sans logique propre à tester |
+| Couverture de code | JaCoCo (le code généré automatiquement par MapStruct n'est pas compté) | ≥ 80% (objectif) | **96% — objectif dépassé** |
 | Bugs critiques | Revue de code (PR) | 0 bug bloquant | — |
 | Vulnérabilités sécurité | Dependabot (GitHub) | 0 CVE critique | — |
 | Temps de réponse P95 | Spring Actuator + Micrometer | < 2 000 ms | Non mesuré en charge à ce jour |
@@ -123,7 +120,7 @@ npm start                     # -> http://localhost:4200
 npm run build                 # -> dist/frontend (assets statiques)
 ```
 
-Le build produit des **assets statiques** (HTML/CSS/JS) déployables derrière un serveur web (Nginx) ou un CDN, indépendamment de l'API. Le *lazy-loading* des routes (chaque écran est un *chunk* séparé) garantit un premier chargement léger (≈ 90 kB transférés). Cette séquence s'insère dans le protocole de déploiement continu : build → artefacts statiques → publication → *health check*.
+Le build produit des fichiers statiques (HTML/CSS/JS) : on peut les héberger sur n'importe quel serveur web (Nginx, un CDN…), sans dépendre de l'API pour les servir. Chaque écran se charge séparément (*lazy-loading*), donc la première page reste légère (environ 90 kB). Ce build s'intègre à la même chaîne que le back-end : build → fichiers → mise en ligne → vérification que ça fonctionne.
 
 ---
 
@@ -178,20 +175,11 @@ jobs:
         working-directory: creditflow
 ```
 
-Ce pipeline exécute automatiquement `mvn clean verify` qui compile le code et lance tous les tests unitaires (JUnit 5 + Mockito). Deux classes de test chargent le contexte Spring complet (`@SpringBootTest`) et ont donc besoin d'une base PostgreSQL réellement disponible : le job déclare un service `postgres` dédié à cet effet, avec health-check, pour que ces tests puissent se connecter dès le démarrage du conteneur. Si les tests échouent, le pipeline s'arrête et l'image Docker n'est pas construite.
+À chaque push ou pull request, ce pipeline lance `mvn clean verify` : il compile le code et fait tourner tous les tests (JUnit 5 + Mockito). Deux tests démarrent une vraie application Spring (`@SpringBootTest`) et ont donc besoin d'une base PostgreSQL — le job en démarre une dédiée, avec un contrôle de santé, pour qu'elle soit prête au bon moment. Si un test échoue, le pipeline s'arrête là : l'image Docker n'est pas construite.
 
-### Stratégie de Branches (GitFlow)
+### Stratégie Git
 
-```
-main ────────────────────────────────────────────► production
-  │
-develop ─────────────────────────────────────────► intégration
-  │
-  ├── feature/F01-soumettre-demande
-  ├── feature/F02-lister-demandes
-  ├── feature/F05-scoring-externe
-  └── hotfix/BUG-001-npe-statut
-```
+Projet développé seul : une seule branche `main`, un commit par fonctionnalité ajoutée (ex. `added RabbitMQ Notifications on status change`), sans branches parallèles. Chaque commit correspond à un lot fonctionnel identifiable dans l'historique (`git log --oneline`), ce qui suffit à tracer les évolutions sur un projet à un seul développeur. Sur une équipe plus grande, un modèle par branches (une branche par fonctionnalité, fusionnée après revue) serait préférable.
 
 ### Séquences d'Intégration
 
@@ -282,7 +270,7 @@ com.nexusbank.creditflow/
 
 ### Prototype de l'Interface Web (Front-End Angular)
 
-Un **prototype fonctionnel** d'interface web a été développé pour permettre aux utilisateurs métier d'exploiter le microservice sans outil technique. Il couvre l'ensemble des *user stories* principales (US01 à US07).
+Une interface web a été développée pour que les utilisateurs métier puissent se servir du microservice sans outil technique (pas de Postman, pas de ligne de commande). Elle couvre les principales *user stories* (US01 à US08).
 
 #### Stack et paradigmes de développement
 
@@ -314,8 +302,8 @@ L'interface est **responsive** (adaptation mobile/desktop) et fournit un retour 
 #### Sécurité du prototype (côté client)
 
 - **Intercepteur HTTP JWT** : ajoute automatiquement l'en-tête `Authorization: Bearer <token>` ; en cas de réponse `401`, purge la session et redirige vers `/login`.
-- **Guards de routage** : `authGuard` (utilisateurs authentifiés) et `roleGuard(...rôles)` (contrôle par rôle), dont la matrice reproduit exactement le `SecurityConfig` du back-end — `CLIENT` → soumission + liste **scopée à ses propres demandes** + détail ; `ANALYSTE` → liste complète + détail + changement de statut ; `DIRECTEUR` → liste complète + changement de statut.
-- **Défense en profondeur** : le front masque les actions non autorisées, mais la décision de sécurité **fait toujours autorité côté serveur** (`401`/`403`). Le token est stocké en `localStorage` puis décodé pour l'affichage du rôle.
+- **Guards de routage** : `authGuard` bloque l'accès à qui n'est pas connecté ; `roleGuard` bloque l'accès selon le rôle. Les règles copient exactement celles du back-end — `CLIENT` : soumettre une demande, voir sa propre liste et son détail ; `ANALYSTE` : voir la liste complète, le détail, changer un statut ; `DIRECTEUR` : voir la liste complète, changer un statut.
+- **Sécurité en double** : le front cache les boutons et actions non autorisés, mais c'est toujours le back-end qui décide vraiment (`401`/`403`) — même en contournant le front, le serveur refuse. Le token est stocké dans `localStorage` et lu pour afficher le rôle à l'écran.
 
 ---
 
@@ -328,9 +316,9 @@ L'interface est **responsive** (adaptation mobile/desktop) et fournit un retour 
 │                 Pyramide de Tests                    │
 │                                                      │
 │              ┌────────────┐                          │
-│              │  E2E (5%)  │  Postman / Newman        │
+│              │  E2E (5%)  │  Recette manuelle        │
 │           ┌──┴────────────┴──┐                       │
-│           │ Intégration (15%)│  @SpringBootTest       │
+│           │ Intégration (15%)│  @SpringBootTest      │
 │        ┌──┴──────────────────┴──┐                    │
 │        │   Unitaires (80%)      │  JUnit5 + Mockito  │
 │        └────────────────────────┘                    │
@@ -561,9 +549,9 @@ public class DemandeCreditControllerTest {
 | `DemandeCreditController` | `DemandeCreditControllerTest` | 9 | Unitaire (Mockito) — dont le contrôle anti-IDOR |
 | `DbIsolationManager` | `DbIsolationManagerTest` | 8 | Unitaire (Mockito + mappeurs réels) |
 | `ScoringIsolationManager` | `ScoringIsolationManagerTest` | 2 | Unitaire (WebClient mocké) |
-| **Total back-end** | **12 classes de test** | **43 tests, tous passants** | **Couverture JaCoCo mesurée : 96,1% (instructions) / 95,4% (lignes) — voir détail par classe en C2.1.1** |
+| **Total back-end** | **12 classes de test** | **43 tests, tous passants** | **Couverture JaCoCo mesurée : 96%** |
 
-> **Côté front-end**, l'échafaudage de tests **Jasmine/Karma** est en place (`ng test`) avec un test de montage du composant racine (`app.spec.ts`). Les services (`AuthService`, `DemandeService`) et les *guards* sont conçus pour être testables unitairement (dépendances injectées, logique pure, pas d'accès direct au DOM).
+Côté front-end, les tests sont en place avec un test de montage du composant racine (`app.spec.ts`). Les services (`AuthService`, `DemandeService`) et les *guards* sont conçus pour être testables unitairement (dépendances injectées, logique pure, pas d'accès direct au DOM).
 
 ---
 
@@ -573,18 +561,18 @@ public class DemandeCreditControllerTest {
 
 | # | Catégorie OWASP | Risque dans CreditFlow | Mesure Implémentée |
 |---|-----------------|------------------------|---------------------|
-| A01 | Broken Access Control | Accès à des endpoints hors périmètre | Spring Security RBAC — restrictions par rôle (`hasRole("CLIENT")`, `hasAnyRole("ANALYSTE", "DIRECTEUR", "CLIENT")` selon l'endpoint) sur chaque endpoint via `SecurityConfig`. Contrôle de propriété (anti-IDOR) à double niveau : sur `GET /api/v1/demandes/{id}`, un CLIENT ne peut consulter que les demandes dont il est l'auteur (`clientUsername`, vérifié dans `DemandeCreditController`), sous peine de `403 Forbidden` ; sur `GET /api/v1/demandes` (liste), le même principe s'applique par filtrage serveur (`DbIsolationManager.findByClientUsername`) plutôt que par rejet — un CLIENT récupère uniquement ses propres demandes, jamais celles d'un tiers. ANALYSTE/DIRECTEUR voient l'intégralité du portefeuille sans cette restriction |
-| A02 | Cryptographic Failures | Mots de passe en clair | Mots de passe hashés avec `BCryptPasswordEncoder` ; token JWT signé via `Keys.hmacShaKeyFor()` (algorithme HMAC sélectionné automatiquement selon la longueur de clé — HS384 avec la clé actuelle). La clé de signature (`jwt.secret`) et les identifiants de base de données sont externalisés via variables d'environnement (`JWT_SECRET`, `SPRING_DATASOURCE_*`), avec valeur par défaut de développement pour ne pas casser le démarrage local |
-| A03 | Injection | Injection SQL via champs API | Requêtes paramétrées JPA (Spring Data), Bean Validation `@NotNull`, `@NotBlank`, `@DecimalMin`, `@Min` sur tous les `ModeleApi` |
-| A04 | Insecure Design | Workflow de décision contournable | Machine à états stricte (`StatutTransitionValidator`) — transitions validées côté serveur ; une transition interdite renvoie désormais `409 Conflict` avec message explicite (`GlobalExceptionHandler`) plutôt qu'une erreur serveur générique |
-| A05 | Security Misconfiguration | Endpoints non protégés | CSRF désactivé (API stateless), sessions `STATELESS`, seuls les endpoints publics explicitement autorisés dans `SecurityConfig`. Identifiants de base de données externalisés (voir A02). Seul `/actuator/health` reste public, et en mode `show-details=when-authorized` (un appel anonyme ne voit que `{"status":"UP"}`, le détail des composants n'apparaît qu'authentifié) ; `/actuator/prometheus` et `/actuator/metrics` exigent désormais une authentification |
+| A01 | Broken Access Control | Accès à des endpoints hors périmètre | Chaque endpoint vérifie le rôle via Spring Security (`SecurityConfig`). Un CLIENT ne voit que ses propres demandes, jamais celles d'un autre : refusé (`403`) s'il essaie d'accéder directement à la demande d'un tiers par son identifiant, et filtré automatiquement côté serveur pour la liste. ANALYSTE et DIRECTEUR voient tout, sans cette limite |
+| A02 | Cryptographic Failures | Mots de passe en clair | Mots de passe hachés avec `BCryptPasswordEncoder` (jamais stockés en clair). Les tokens JWT sont signés avec une clé secrète (`jwt.secret`). Cette clé et les identifiants de base de données ne sont pas écrits en dur dans le code : ils viennent de variables d'environnement (`JWT_SECRET`, `SPRING_DATASOURCE_*`), avec une valeur par défaut pratique pour développer en local |
+| A03 | Injection | Injection SQL via champs API | Requêtes paramétrées via Spring Data (pas de SQL construit à la main), et validation systématique des champs d'entrée (`@NotNull`, `@NotBlank`, `@DecimalMin`, `@Min`) |
+| A04 | Insecure Design | Workflow de décision contournable | Une machine à états (`StatutTransitionValidator`) vérifie côté serveur qu'une transition de statut est autorisée ; une transition interdite renvoie une erreur claire (`409 Conflict`) plutôt qu'un plantage générique |
+| A05 | Security Misconfiguration | Endpoints non protégés | L'API ne garde pas de session (`STATELESS`), donc pas de protection CSRF à gérer. Seuls les endpoints listés explicitement dans `SecurityConfig` sont publics — tout le reste demande une authentification. Seul `/actuator/health` reste accessible sans compte, et encore : un appel anonyme ne voit que `{"status":"UP"}`, sans détail. `/actuator/prometheus` et `/actuator/metrics` demandent désormais un compte |
 | A06 | Vulnerable Components | Dépendances obsolètes | Dependabot configuré (`.github/dependabot.yml`) — surveillance hebdomadaire Maven + Docker |
 | A07 | Auth Failures | Token falsifié ou expiré | Validation JWT systématique via `JwtAuthenticationFilter`, rejet des tokens expirés ou avec signature invalide |
 | A08 | Software Integrity | Image Docker compromise | Dockerfile multi-stage (build séparé du runtime), `.dockerignore` pour exclure `.git/`, code source non présent dans l'image finale |
-| A09 | Logging Failures | Pas de trace des décisions | Journalisation immuable de chaque changement de statut dans la table `decision_audit` (qui, quand, ancien/nouveau statut), déclenchée explicitement par `DemandeCreditController` → `DemandeCreditService.changerStatut` → `DbIsolationManager.auditerChangementStatut` (appel direct, sans AOP — voir note d'architecture ci-dessous) |
+| A09 | Logging Failures | Pas de trace des décisions | Chaque changement de statut est enregistré de façon immuable dans la table `decision_audit` (qui, quand, ancien et nouveau statut). L'enregistrement passe par un appel direct — contrôleur → service → accès aux données — sans AOP (voir la note ci-dessous) |
 | A10 | SSRF | Appel scoring vers URL arbitraire | URL du bureau de crédit fixée en dur dans `ScoringIsolationManager` (`http://localhost:8081`), non paramétrable par l'utilisateur |
 
-> **Note d'architecture (A09) :** la journalisation d'audit a d'abord été implémentée via Spring AOP (`@AfterReturning`), cohérent avec l'esprit cross-cutting-concern de l'architecture. Cette implémentation a ensuite été remplacée par un appel direct (contrôleur → service → `DbIsolationManager`) après avoir constaté, à l'exécution, des échecs de build intermittents. Investigation faite : la cause n'était finalement pas l'AOP elle-même, mais une interférence de build sur la machine de développement — le serveur de langage Java de l'IDE recompile en tâche de fond dans le même dossier `target/classes` que Maven, et peut ponctuellement y écrire une classe partiellement compilée pendant qu'un `mvn verify` s'exécute (confirmé en suspendant temporairement le processus du serveur de langage : le taux d'échec tombe alors à 0 sur plusieurs essais consécutifs). L'appel direct a été conservé malgré tout : il est plus simple, tout aussi correct, et n'a plus besoin d'activer le proxying AOP de Spring pour cette seule fonctionnalité.
+> **Note d'architecture (A09) :** la journalisation d'audit a d'abord été codée avec Spring AOP (`@AfterReturning`), une technique qui déclenche du code automatiquement autour d'une méthode. Mais le build échouait parfois, sans raison apparente. Après investigation, la vraie cause n'était pas l'AOP : l'éditeur de code recompilait le projet en arrière-plan pendant que Maven faisait la même chose, et les deux écrivaient parfois en même temps dans le même dossier `target/classes` — ce qui cassait le build de temps en temps. En suspendant temporairement le processus de l'éditeur pendant un build, plus aucun échec ne s'est produit, ce qui a confirmé cette cause. L'appel direct (contrôleur → service → accès aux données) a quand même été gardé à la place de l'AOP : plus simple à lire, tout aussi correct, et ça évite d'activer un mécanisme Spring supplémentaire pour une seule fonctionnalité.
 
 ### Validation des Entrées API (Bean Validation)
 
@@ -630,7 +618,7 @@ Le **RGAA 4.1** (Référentiel Général d'Amélioration de l'Accessibilité) a 
 
 #### Application au projet
 
-CreditFlow comprend désormais une **interface web dédiée (front-end Angular)** en complément de l'API REST. Le RGAA 4.1 est mis en œuvre concrètement, **en priorité sur l'interface web utilisateur** détaillée ci-dessous :
+CreditFlow a maintenant une interface web (front-end Angular) en plus de l'API REST. Le RGAA 4.1 est appliqué concrètement, d'abord sur cette interface :
 
 **1. Interface Web Angular — mesures RGAA 4.1 implémentées**
 
@@ -668,50 +656,13 @@ CreditFlow comprend désormais une **interface web dédiée (front-end Angular)*
 
 #### Vérification de la conformité
 
-Les mesures ci-dessus sont **vérifiables** : navigation complète au clavier (tabulation, `Échap`, focus visible), audit automatique via **Lighthouse / axe DevTools**, et contrôle des contrastes. Un test complémentaire au lecteur d'écran (VoiceOver / NVDA) est prévu en recette pour valider la restitution vocale des régions *live* et des messages d'erreur de formulaire.
-
----
-
-## C2.2.4 — Gestion des Versions
-
-### Stratégie de Versionnement Sémantique (SemVer)
-
-```
-MAJOR.MINOR.PATCH
-  │      │     │
-  │      │     └── Corrections de bugs (hotfix)
-  │      └──────── Nouvelles fonctionnalités compatibles
-  └─────────────── Ruptures de compatibilité API
-```
-
-### Historique des Versions
-
-Les jalons ci-dessous correspondent à la progression réelle des commits Git (21 commits incrémentaux et descriptifs sur le back-end, consultables via `git log`), et sont désormais matérialisés par des tags Git annotés sur les commits correspondants :
-
-| Version | Tag Git | Type | Changements |
-|---------|---------|------|-------------|
-| `0.1.0` | `v0.1.0` | MINOR | Structure SOL V1, modèles (Api/Interne/Accesseur), MapStruct, couche DB, endpoints POST/GET demandes |
-| `0.2.0` | `v0.2.0` | MINOR | Scoring externe (WebClient + Resilience4j Circuit Breaker), machine à états (`StatutTransitionValidator`), PATCH statut |
-| `0.3.0` | `v0.3.0` | MINOR | Authentification JWT (`JwtService`, `JwtAuthenticationFilter`), RBAC (`SecurityConfig`), endpoint login |
-| `0.4.0` | `v0.4.0` | MINOR | Journalisation immuable des décisions, pagination des résultats, notifications RabbitMQ (`NotificationPublisher`) |
-| `0.5.0` | `v0.5.0` | MINOR | Monitoring Actuator + Micrometer + Prometheus, structured logging JSON (Logback) |
-| `1.0.0` | `v1.0.0` | MAJOR | Release finale — Dockerfile multi-stage, CI/CD GitHub Actions, Dependabot, documentation complète |
-
-### Outils de Suivi des Versions
-
-- **Tags Git annotés** sur les commits marquant chaque jalon (`git tag -a v0.1.0 <commit> -m "..."`, etc.) — consultables via `git log --oneline --decorate` ou `git tag -l -n1`
-- **Historique Git** : commits incrémentaux et descriptifs, un par lot fonctionnel (`git log --oneline`)
-- **Stratégie retenue** : SemVer (voir ci-dessus), appliquée à la numérotation des tags Git
-
-**Point restant à traiter avant la soutenance :** les dossiers `docs/` (dont ce document) et `frontend/` ne sont, à ce jour, **pas encore suivis par Git** — leur ajout au dépôt (`git add` + commit) est nécessaire pour que l'historique de versions couvre l'intégralité du livrable, prototype front-end inclus. Un nouveau tag (`v1.1.0` par exemple) reste également à créer une fois ces ajouts commités, pour couvrir les correctifs de sécurité (IDOR, secrets, Actuator), les 43 tests et le correctif RBAC décrits dans ce document (voir C2.2.3 et C2.3.2, BUG-002). Les GitHub Releases (publication des tags avec artefacts JAR/image Docker) restent également à créer sur le dépôt distant.
-
-### Logiciel Fonctionnel et Manipulable en Autonomie
-
-La dernière version intègre l'**interface web Angular**, qui rend le logiciel **manipulable en autonomie par un utilisateur** non technique : après authentification, un client soumet une demande et en suit le score / statut, tandis qu'un analyste ou un directeur instruit les dossiers (liste paginée, changement de statut) directement depuis le navigateur, **sans appel d'API manuel**. Le front-end est versionné dans le même dépôt (`frontend/`) et évolue avec le back-end.
+Ces mesures peuvent être vérifiées concrètement : navigation complète au clavier (tabulation, `Échap`, focus visible), audit automatique avec Lighthouse ou axe DevTools, et contrôle des contrastes de couleur. Un test avec un lecteur d'écran (VoiceOver ou NVDA) est aussi prévu en recette, pour vérifier que les notifications et messages d'erreur sont bien lus à voix haute.
 
 ---
 
 ## C2.3.1 — Cahier de Recettes
+
+Ce cahier couvre les trois familles de tests attendues : tests **fonctionnels** (scénarios 1, 2, 3, 6 — parcours utilisateur et métier de bout en bout), tests **structurels** (couverture du code par les tests unitaires, détaillée en § C2.2.2 : 43 tests, 96% de couverture) et tests de **sécurité** (scénario 4 — authentification, RBAC, anti-IDOR).
 
 ### Scénario de Test 1 — Soumission d'une Demande de Crédit
 
@@ -875,9 +826,9 @@ Documenter dans le message de commit + journal des anomalies
 | **Étapes de reproduction** | 1. Se connecter en tant que `client1` 2. Soumettre une demande de crédit 3. Se déconnecter puis se reconnecter en `client1` 4. Aucun écran ni lien de menu ne permet de retrouver la demande soumise |
 | **Comportement observé** | `GET /api/v1/demandes` renvoie HTTP 403 pour un rôle CLIENT ; la route Angular `/demandes` et le lien de navigation associé étaient réservés à ANALYSTE/DIRECTEUR ; seule la création (`/demandes/nouvelle`) était accessible |
 | **Comportement attendu** | Un CLIENT doit pouvoir consulter la liste de ses propres demandes, au même titre qu'il peut déjà consulter le détail d'une demande individuelle (`GET /demandes/{id}`) |
-| **Cause racine** | Règle `SecurityConfig` sur `GET /api/v1/demandes` limitée à `hasAnyRole("ANALYSTE", "DIRECTEUR")` ; aucune méthode de filtrage par `clientUsername` dans `DemandeCreditRepository` ; route Angular et lien de menu correspondants restreints aux mêmes rôles côté front |
-| **Correction** | Ajout de `CLIENT` à la règle de sécurité ; nouvelle méthode `DemandeCreditRepository.findByClientUsername` + `DbIsolationManager`/`DemandeCreditService` associés ; `DemandeCreditController.obtenirToutesLesDemandes` renvoie désormais la liste complète pour ANALYSTE/DIRECTEUR et la liste scopée au `clientUsername` de l'appelant pour CLIENT ; ouverture de la route `/demandes` et ajout du lien « Mes demandes » côté Angular ; 2 tests ajoutés dans `DemandeCreditControllerTest` (liste complète pour le staff, liste scopée pour un client) |
-| **Statut** | Corrigé et vérifié manuellement (voir Scénario de Test 6, étapes 1-6) — en attente de commit/tag de version (voir C2.2.4) |
+| **Cause racine** | La règle de sécurité sur `GET /api/v1/demandes` n'autorisait que ANALYSTE et DIRECTEUR. `DemandeCreditRepository` n'avait aucune méthode pour filtrer les demandes par client. Côté Angular, la route et le lien de menu correspondants étaient réservés aux mêmes rôles |
+| **Correction** | Ajout de `CLIENT` à la règle de sécurité. Nouvelle méthode `findByClientUsername` dans le repository, reliée au service et à l'accès aux données. Le contrôleur renvoie désormais la liste complète pour ANALYSTE/DIRECTEUR, et seulement les demandes du client pour CLIENT. Côté Angular : ouverture de la route `/demandes` et ajout du lien « Mes demandes ». Deux tests ajoutés pour vérifier les deux cas (liste complète, liste filtrée) |
+| **Statut** | Corrigé et vérifié manuellement (voir Scénario de Test 6, étapes 1-6) — en attente de commit/tag de version |
 
 Cette anomalie illustre concrètement le processus décrit ci-dessus : détectée lors d'une recette utilisateur réelle (et non lors d'une revue de code), elle a été qualifiée en P2, sa cause racine identifiée avant correction (plutôt qu'un correctif superficiel), puis validée par de nouveaux tests unitaires avant d'être considérée comme résolue.
 
@@ -886,6 +837,17 @@ Cette anomalie illustre concrètement le processus décrit ci-dessus : détecté
 ## C2.4.1 — Documentation Technique
 
 ### Manuel de Déploiement
+
+#### Choix Technologiques
+
+| Technologie | Justification |
+|---|---|
+| Spring Boot 4.0.3 (Java 21) | Écosystème mature pour un microservice bancaire : injection de dépendances, Spring Security pour le RBAC/JWT, Spring Data JPA, intégration native avec Actuator/Micrometer pour le monitoring |
+| PostgreSQL | Base relationnelle avec garanties ACID — cohérence indispensable pour des données financières (montants, statuts de décision) |
+| RabbitMQ | Découplage asynchrone des notifications de changement de statut, sans bloquer le flux métier principal |
+| MapStruct | Mapping *compile-time* (pas de réflexion à l'exécution) entre les 3 types de modèles de l'architecture SOL V1 — performant, et erreurs de mapping détectées dès la compilation |
+| Angular 20 (*standalone*, *signals*) | Framework SPA robuste pour une interface multi-rôles (CLIENT/ANALYSTE/DIRECTEUR), TypeScript strict, réactivité fine sans NgModules |
+| Docker multi-stage | Image de production légère (JRE seul embarqué) — outils de build et code source absents de l'image finale |
 
 #### Prérequis
 
@@ -952,7 +914,7 @@ docker compose logs -f
 | `JWT_SECRET` | Clé de signature des tokens JWT | valeur de développement (à changer en production) |
 | `SERVER_PORT` | Port de l'application | `8080` |
 
-Toutes ces variables ont une valeur par défaut adaptée au développement local (`docker compose up -d` + `mvn spring-boot:run` fonctionnent sans rien configurer) ; en production, elles doivent être surchargées, en particulier `JWT_SECRET` et les identifiants PostgreSQL/RabbitMQ.
+Toutes ces variables ont une valeur par défaut qui fonctionne directement en local (`docker compose up -d` + `mvn spring-boot:run` marchent sans rien régler). En production, il faut les changer — surtout `JWT_SECRET` et les identifiants PostgreSQL/RabbitMQ.
 
 #### Déploiement du Front-End (Interface Web)
 
@@ -1086,14 +1048,12 @@ Pour le **front-end**, les dépendances npm se mettent à jour via `npm outdated
 
 #### Procédure de Mise à Jour Applicative
 
-1. Créer une branche `release/x.y.z`
-2. Mettre à jour `pom.xml` (version)
-3. Exécuter la CI complète (`mvn clean verify` + build Docker)
-4. Créer un tag Git annoté : `git tag -a vx.y.z -m "Description"`
-5. Merger vers `main`, pousser le tag
-6. Pipeline CI/CD GitHub Actions déclenché automatiquement
-7. Vérifier le health check : `curl http://localhost:8080/actuator/health`
-8. Documenter dans le journal des versions (BLOC 4)
+1. Mettre à jour le numéro de version dans `pom.xml`
+2. Commiter directement sur `main` (pratique actuelle du projet — voir « Stratégie Git » en C2.1.2)
+3. Vérifier que la CI passe (`mvn clean verify` + build Docker)
+4. Créer un tag Git annoté (`git tag -a vx.y.z -m "Description"`) et le pousser
+5. Le pipeline GitHub Actions se relance automatiquement sur ce push
+6. Vérifier le health check : `curl http://localhost:8080/actuator/health`
 
 ---
 
